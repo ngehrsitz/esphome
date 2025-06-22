@@ -389,7 +389,7 @@ void WebServer::handle_components_request(AsyncWebServerRequest *request) {
 #ifdef USE_SENSOR
     JsonArray sensors = root.createNestedArray("sensors");
     for (auto *obj : App.get_sensors()) {
-      if (!component_ids.empty() && !component_ids.contains(obj->get_object_id()))
+      if (!component_ids.empty() && component_ids.count(obj->get_object_id()) == 0)
         continue;
       auto nested = sensors.createNestedObject();
       this->sensor_json(obj, obj->state, DETAIL_ALL)(nested);
@@ -398,7 +398,7 @@ void WebServer::handle_components_request(AsyncWebServerRequest *request) {
 #ifdef USE_SWITCH
     JsonArray switches = root.createNestedArray("switches");
     for (auto *obj : App.get_switches()) {
-      if (!component_ids.empty() && !component_ids.contains(obj->get_object_id()))
+      if (!component_ids.empty() && component_ids.count(obj->get_object_id()) == 0)
         continue;
       auto nested = switches.createNestedObject();
       this->switch_json(obj, obj->state, DETAIL_ALL)(nested);
@@ -407,7 +407,7 @@ void WebServer::handle_components_request(AsyncWebServerRequest *request) {
 #ifdef USE_LIGHT
     JsonArray lights = root.createNestedArray("lights");
     for (auto *obj : App.get_lights()) {
-      if (!component_ids.empty() && !component_ids.contains(obj->get_object_id()))
+      if (!component_ids.empty() && component_ids.count(obj->get_object_id()) == 0)
         continue;
       auto nested = lights.createNestedObject();
       this->light_json(obj, DETAIL_ALL)(nested);
