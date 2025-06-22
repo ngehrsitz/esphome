@@ -377,6 +377,7 @@ void WebServer::on_sensor_update(sensor::Sensor *obj, float state) {
   this->events_.deferrable_send_state(obj, "state", sensor_state_json_generator);
 }
 void WebServer::handle_sensor_request(AsyncWebServerRequest *request, const UrlMatch &match) {
+// here
   for (sensor::Sensor *obj : App.get_sensors()) {
     if (obj->get_object_id() != match.id)
       continue;
@@ -2020,6 +2021,8 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
     return;
   }
 #endif
+
+# here
 
   UrlMatch match = match_url(request->url().c_str());  // NOLINT
 #ifdef USE_SENSOR
