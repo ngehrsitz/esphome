@@ -67,7 +67,7 @@ enum JsonDetail { DETAIL_ALL, DETAIL_STATE };
   can be forgotten.
 */
 #ifdef USE_ARDUINO
-using message_generator_t = std::function<void(JsonObject)>(WebServer *, void *);
+using message_generator_t = std::string(WebServer *, void *);
 
 class DeferredUpdateEventSourceList;
 class DeferredUpdateEventSource : public AsyncEventSource {

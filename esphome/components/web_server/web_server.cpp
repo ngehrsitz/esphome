@@ -90,7 +90,7 @@ void DeferredUpdateEventSource::deq_push_back_with_dedup_(void *source, message_
 void DeferredUpdateEventSource::process_deferred_queue_() {
   while (!deferred_queue_.empty()) {
     DeferredEvent &de = deferred_queue_.front();
-    std::string message = json::build_json(de.message_generator_(web_server_, de.source_));
+    std::string message = de.message_generator_(web_server_, de.source_);
     if (this->send(message.c_str(), "state") != DISCARDED) {
       // O(n) but memory efficiency is more important than speed here which is why std::vector was chosen
       deferred_queue_.erase(deferred_queue_.begin());
@@ -130,7 +130,7 @@ void DeferredUpdateEventSource::deferrable_send_state(void *source, const char *
     // deferred queue still not empty which means downstream event queue full, no point trying to send first
     deq_push_back_with_dedup_(source, message_generator);
   } else {
-    std::string message = json::build_json(message_generator(web_server_, source));
+    std::string message = message_generator(web_server_, source);
     if (this->send(message.c_str(), "state") == DISCARDED) {
       deq_push_back_with_dedup_(source, message_generator);
     }
