@@ -376,23 +376,41 @@ void WebServer::handle_components_request(AsyncWebServerRequest *request) {
     return;
   }
 
-  std::string data = json::build_json([this](JsonObject root) {
+  // multiple component ids can be requested at once
+  std::set<std::string> component_ids;
+  for (size_t i = 0; i < request->params(); i++) {
+    auto *param = request->getParam(i);
+    if (param->name() == "id") {
+      component_ids.insert(param->value().c_str());
+    }
+  }
+
+  std::string data = json::build_json([this, &component_ids](JsonObject root) {
 #ifdef USE_SENSOR
     JsonArray sensors = root.createNestedArray("sensors");
     for (auto *obj : App.get_sensors()) {
-      sensors.add(json::parse(json::build_json(this->sensor_json(obj, obj->state, DETAIL_ALL))));
+      if (!component_ids.empty() && !component_ids.contains(obj->get_object_id()))
+        continue;
+      auto nested = sensors.createNestedObject();
+      this->sensor_json(obj, obj->state, DETAIL_ALL)(nested);
     }
 #endif
 #ifdef USE_SWITCH
     JsonArray switches = root.createNestedArray("switches");
     for (auto *obj : App.get_switches()) {
-      switches.add(json::parse(json::build_json(this->switch_json(obj, obj->state, DETAIL_ALL))));
+      if (!component_ids.empty() && !component_ids.contains(obj->get_object_id()))
+        continue;
+      auto nested = switches.createNestedObject();
+      this->switch_json(obj, obj->state, DETAIL_ALL)(nested);
     }
 #endif
 #ifdef USE_LIGHT
     JsonArray lights = root.createNestedArray("lights");
     for (auto *obj : App.get_lights()) {
-      lights.add(json::parse(json::build_json(this->light_json(obj, DETAIL_ALL))));
+      if (!component_ids.empty() && !component_ids.contains(obj->get_object_id()))
+        continue;
+      auto nested = lights.createNestedObject();
+      this->light_json(obj, DETAIL_ALL)(nested);
     }
 #endif
   });
