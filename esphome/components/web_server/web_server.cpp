@@ -415,21 +415,21 @@ void WebServer::handle_sensor_request(AsyncWebServerRequest *request, const UrlM
       if (param && param->value() == "all") {
         detail = DETAIL_ALL;
       }
-      std::string data = this->sensor_json(obj, obj->state, detail);
+      std::string data = json::build_json(this->sensor_json(obj, obj->state, detail));
       request->send(200, "application/json", data.c_str());
       return;
     }
   }
   request->send(404);
 }
-std::string WebServer::sensor_state_json_generator(WebServer *web_server, void *source) {
+std::function<void(JsonObject)> WebServer::sensor_state_json_generator(WebServer *web_server, void *source) {
   return web_server->sensor_json((sensor::Sensor *) (source), ((sensor::Sensor *) (source))->state, DETAIL_STATE);
 }
-std::string WebServer::sensor_all_json_generator(WebServer *web_server, void *source) {
+std::function<void(JsonObject)> WebServer::sensor_all_json_generator(WebServer *web_server, void *source) {
   return web_server->sensor_json((sensor::Sensor *) (source), ((sensor::Sensor *) (source))->state, DETAIL_ALL);
 }
-std::string WebServer::sensor_json(sensor::Sensor *obj, float value, JsonDetail start_config) {
-  return json::build_json([this, obj, value, start_config](JsonObject root) {
+std::function<void(JsonObject)> WebServer::sensor_json(sensor::Sensor *obj, float value, JsonDetail start_config) {
+  return [this, obj, value, start_config](JsonObject root) {
     std::string state;
     if (std::isnan(value)) {
       state = "NA";
@@ -449,7 +449,7 @@ std::string WebServer::sensor_json(sensor::Sensor *obj, float value, JsonDetail 
       if (!obj->get_unit_of_measurement().empty())
         root["uom"] = obj->get_unit_of_measurement();
     }
-  });
+  };
 }
 #endif
 
