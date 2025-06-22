@@ -370,6 +370,35 @@ void WebServer::handle_js_request(AsyncWebServerRequest *request) {
   set_json_value(root, obj, sensor, value, start_config); \
   (root)["state"] = state;
 
+void WebServer::handle_components_request(AsyncWebServerRequest *request) {
+  if (request->method() != HTTP_GET) {
+    request->send(404);
+    return;
+  }
+
+  std::string data = json::build_json([this](JsonObject root) {
+#ifdef USE_SENSOR
+    JsonArray sensors = root.createNestedArray("sensors");
+    for (auto *obj : App.get_sensors()) {
+      sensors.add(json::parse(this->sensor_json(obj, obj->state, DETAIL_ALL)));
+    }
+#endif
+#ifdef USE_SWITCH
+    JsonArray switches = root.createNestedArray("switches");
+    for (auto *obj : App.get_switches()) {
+      switches.add(json::parse(this->switch_json(obj, obj->state, DETAIL_ALL)));
+    }
+#endif
+#ifdef USE_LIGHT
+    JsonArray lights = root.createNestedArray("lights");
+    for (auto *obj : App.get_lights()) {
+      lights.add(json::parse(this->light_json(obj, DETAIL_ALL)));
+    }
+#endif
+  });
+
+  request->send(200, "application/json", data.c_str());}
+
 #ifdef USE_SENSOR
 void WebServer::on_sensor_update(sensor::Sensor *obj, float state) {
   if (this->events_.empty())
@@ -377,7 +406,6 @@ void WebServer::on_sensor_update(sensor::Sensor *obj, float state) {
   this->events_.deferrable_send_state(obj, "state", sensor_state_json_generator);
 }
 void WebServer::handle_sensor_request(AsyncWebServerRequest *request, const UrlMatch &match) {
-// here
   for (sensor::Sensor *obj : App.get_sensors()) {
     if (obj->get_object_id() != match.id)
       continue;
@@ -1996,7 +2024,7 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
 
 #ifdef USE_ARDUINO
   if (request->url() == "/events") {
-    this->events_.add_new_client(this, request);
+    this->handle_components_request(request);
     return;
   }
 #endif
@@ -2022,7 +2050,10 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
   }
 #endif
 
-# here
+  if (request->url() == "/components") {
+    this->handle_js_request(request);
+    return;
+  }
 
   UrlMatch match = match_url(request->url().c_str());  // NOLINT
 #ifdef USE_SENSOR
