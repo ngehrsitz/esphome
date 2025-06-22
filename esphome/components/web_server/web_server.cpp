@@ -2043,7 +2043,7 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
 
 #ifdef USE_ARDUINO
   if (request->url() == "/events") {
-    this->handle_components_request(request);
+    this->events_.add_new_client(this, request);
     return;
   }
 #endif
@@ -2070,7 +2070,7 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
 #endif
 
   if (request->url() == "/components") {
-    this->handle_js_request(request);
+    this->handle_components_request(request);
     return;
   }
 
