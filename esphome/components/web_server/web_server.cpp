@@ -370,54 +370,6 @@ void WebServer::handle_js_request(AsyncWebServerRequest *request) {
   set_json_value(root, obj, sensor, value, start_config); \
   (root)["state"] = state;
 
-void WebServer::handle_components_request(AsyncWebServerRequest *request) {
-  if (request->method() != HTTP_GET) {
-    request->send(404);
-    return;
-  }
-
-  // multiple component ids can be requested at once
-  std::set<std::string> component_ids;
-  for (size_t i = 0; i < request->params(); i++) {
-    auto *param = request->getParam(i);
-    if (param->name() == "id") {
-      component_ids.insert(param->value().c_str());
-    }
-  }
-
-  std::string data = json::build_json([this, &component_ids](JsonObject root) {
-#ifdef USE_SENSOR
-    JsonArray sensors = root.createNestedArray("sensors");
-    for (auto *obj : App.get_sensors()) {
-      if (!component_ids.empty() && component_ids.count(obj->get_object_id()) == 0)
-        continue;
-      auto nested = sensors.createNestedObject();
-      this->sensor_json(obj, obj->state, DETAIL_ALL)(nested);
-    }
-#endif
-#ifdef USE_SWITCH
-    JsonArray switches = root.createNestedArray("switches");
-    for (auto *obj : App.get_switches()) {
-      if (!component_ids.empty() && component_ids.count(obj->get_object_id()) == 0)
-        continue;
-      auto nested = switches.createNestedObject();
-      this->switch_json(obj, obj->state, DETAIL_ALL)(nested);
-    }
-#endif
-#ifdef USE_LIGHT
-    JsonArray lights = root.createNestedArray("lights");
-    for (auto *obj : App.get_lights()) {
-      if (!component_ids.empty() && component_ids.count(obj->get_object_id()) == 0)
-        continue;
-      auto nested = lights.createNestedObject();
-      this->light_json(obj, DETAIL_ALL)(nested);
-    }
-#endif
-  });
-
-  request->send(200, "application/json", data.c_str());
-}
-
 #ifdef USE_SENSOR
 void WebServer::on_sensor_update(sensor::Sensor *obj, float state) {
   if (this->events_.empty())
@@ -2068,11 +2020,6 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
     return;
   }
 #endif
-
-  if (request->url() == "/components") {
-    this->handle_components_request(request);
-    return;
-  }
 
   UrlMatch match = match_url(request->url().c_str());  // NOLINT
 #ifdef USE_SENSOR
