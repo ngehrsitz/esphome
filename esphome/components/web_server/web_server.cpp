@@ -901,7 +901,7 @@ std::string WebServer::cover_state_json_generator(WebServer *web_server, void *s
   return web_server->cover_json((cover::Cover *) (source), DETAIL_STATE);
 }
 std::string WebServer::cover_all_json_generator(WebServer *web_server, void *source) {
-  return web_server->cover_json((cover::Cover *) (source), DETAIL_STATE);
+  return web_server->cover_json((cover::Cover *) (source), DETAIL_ALL);
 }
 std::string WebServer::cover_json(cover::Cover *obj, JsonDetail start_config) {
   return json::build_json([this, obj, start_config](JsonObject root) {
@@ -1820,7 +1820,7 @@ std::string WebServer::update_state_json_generator(WebServer *web_server, void *
   return web_server->update_json((update::UpdateEntity *) (source), DETAIL_STATE);
 }
 std::string WebServer::update_all_json_generator(WebServer *web_server, void *source) {
-  return web_server->update_json((update::UpdateEntity *) (source), DETAIL_STATE);
+  return web_server->update_json((update::UpdateEntity *) (source), DETAIL_ALL);
 }
 std::string WebServer::update_json(update::UpdateEntity *obj, JsonDetail start_config) {
   return json::build_json([this, obj, start_config](JsonObject root) {
