@@ -370,6 +370,271 @@ void WebServer::handle_js_request(AsyncWebServerRequest *request) {
   set_json_value(root, obj, sensor, value, start_config); \
   (root)["state"] = state;
 
+
+static bool set_contains_or_empty(const std::set<std::string> &set, const std::string &value) {
+  return set.empty() || set.count(value) > 0;
+}
+
+static std::set<std::string> parse_comma_separated_set(const std::string &input) {
+  std::set<std::string> result;
+  size_t start = 0, end;
+  while ((end = input.find(',', start)) != std::string::npos) {
+    auto val = input.substr(start, end - start);
+    if (!val.empty())
+      result.insert(val);
+    start = end + 1;
+  }
+  auto val = input.substr(start);
+  if (!val.empty())
+    result.insert(val);
+  return result;
+}
+
+void WebServer::handle_components_request(AsyncWebServerRequest *request) {
+  if (request->method() != HTTP_GET) {
+    request->send(404);
+    return;
+  }
+
+  std::set<std::string> component_ids;
+  std::set<std::string> component_types;
+
+  auto *id_param = request->getParam("id");
+  if (id_param != nullptr) {
+    component_ids = parse_comma_separated_set(id_param->value().c_str());
+  }
+
+  auto *type_param = request->getParam("component");
+  if (type_param != nullptr) {
+    component_types = parse_comma_separated_set(type_param->value().c_str());
+  }
+
+  std::string data = json::build_json([this, &component_ids, &component_types](JsonObject root) {
+#ifdef USE_SENSOR
+    if (set_contains_or_empty(component_types, "sensor")) {
+      JsonArray sensors = root.createNestedArray("sensors");
+      for (auto *obj : App.get_sensors()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = sensors.createNestedObject();
+          this->sensor_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_SWITCH
+    if (set_contains_or_empty(component_types, "switch")) {
+      JsonArray switches = root.createNestedArray("switches");
+      for (auto *obj : App.get_switches()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = switches.createNestedObject();
+          this->switch_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_BUTTON
+    if (set_contains_or_empty(component_types, "button")) {
+      JsonArray buttons = root.createNestedArray("buttons");
+      for (auto *obj : App.get_buttons()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = buttons.createNestedObject();
+          this->button_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_BINARY_SENSOR
+    if (set_contains_or_empty(component_types, "binary_sensor")) {
+      JsonArray binary_sensors = root.createNestedArray("binary_sensors");
+      for (auto *obj : App.get_binary_sensors()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = binary_sensors.createNestedObject();
+          this->binary_sensor_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_FAN
+    if (set_contains_or_empty(component_types, "fan")) {
+      JsonArray fans = root.createNestedArray("fans");
+      for (auto *obj : App.get_fans()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = fans.createNestedObject();
+          this->fan_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_LIGHT
+    if (set_contains_or_empty(component_types, "light")) {
+      JsonArray lights = root.createNestedArray("lights");
+      for (auto *obj : App.get_lights()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = lights.createNestedObject();
+          this->light_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_TEXT_SENSOR
+    if (set_contains_or_empty(component_types, "text_sensor")) {
+      JsonArray text_sensors = root.createNestedArray("text_sensors");
+      for (auto *obj : App.get_text_sensors()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = text_sensors.createNestedObject();
+          this->text_sensor_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_COVER
+    if (set_contains_or_empty(component_types, "cover")) {
+      JsonArray covers = root.createNestedArray("covers");
+      for (auto *obj : App.get_covers()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = covers.createNestedObject();
+          this->cover_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_NUMBER
+    if (set_contains_or_empty(component_types, "number")) {
+      JsonArray numbers = root.createNestedArray("numbers");
+      for (auto *obj : App.get_numbers()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = numbers.createNestedObject();
+          this->number_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_DATETIME_DATE
+    if (set_contains_or_empty(component_types, "date")) {
+      JsonArray dates = root.createNestedArray("dates");
+      for (auto *obj : App.get_dates()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = dates.createNestedObject();
+          this->date_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_DATETIME_TIME
+    if (set_contains_or_empty(component_types, "time")) {
+      JsonArray times = root.createNestedArray("times");
+      for (auto *obj : App.get_times()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = times.createNestedObject();
+          this->time_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_DATETIME_DATETIME
+    if (set_contains_or_empty(component_types, "datetime")) {
+      JsonArray datetimes = root.createNestedArray("datetimes");
+      for (auto *obj : App.get_datetimes()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = datetimes.createNestedObject();
+          this->datetime_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_TEXT
+    if (set_contains_or_empty(component_types, "text")) {
+      JsonArray texts = root.createNestedArray("texts");
+      for (auto *obj : App.get_texts()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = texts.createNestedObject();
+          this->text_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_SELECT
+    if (set_contains_or_empty(component_types, "select")) {
+      JsonArray selects = root.createNestedArray("selects");
+      for (auto *obj : App.get_selects()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = selects.createNestedObject();
+          this->select_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_CLIMATE
+    if (set_contains_or_empty(component_types, "climate")) {
+      JsonArray climates = root.createNestedArray("climates");
+      for (auto *obj : App.get_climates()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = climates.createNestedObject();
+          this->climate_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_LOCK
+    if (set_contains_or_empty(component_types, "lock")) {
+      JsonArray locks = root.createNestedArray("locks");
+      for (auto *obj : App.get_locks()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = locks.createNestedObject();
+          this->lock_json(obj, obj->state, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_VALVE
+    if (set_contains_or_empty(component_types, "valve")) {
+      JsonArray valves = root.createNestedArray("valves");
+      for (auto *obj : App.get_valves()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = valves.createNestedObject();
+          this->valve_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_ALARM_CONTROL_PANEL
+    if (set_contains_or_empty(component_types, "alarm_control_panel")) {
+      JsonArray alarm_control_panels = root.createNestedArray("alarm_control_panels");
+      for (auto *obj : App.get_alarm_control_panels()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = alarm_control_panels.createNestedObject();
+          this->alarm_control_panel_json(obj, obj->get_state(), DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_EVENT
+    if (set_contains_or_empty(component_types, "event")) {
+      JsonArray events = root.createNestedArray("events");
+      for (auto *obj : App.get_events()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = events.createNestedObject();
+          this->event_json(obj, obj->last_event_type ? *obj->last_event_type : "", DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+#ifdef USE_UPDATE
+    if (set_contains_or_empty(component_types, "update")) {
+      JsonArray updates = root.createNestedArray("updates");
+      for (auto *obj : App.get_updates()) {
+        if (set_contains_or_empty(component_ids, obj->get_object_id())) {
+          auto nested = updates.createNestedObject();
+          this->update_json(obj, DETAIL_ALL)(nested);
+        }
+      }
+    }
+#endif
+  });
+
+  request->send(200, "application/json", data.c_str());
+}
+
 #ifdef USE_SENSOR
 void WebServer::on_sensor_update(sensor::Sensor *obj, float state) {
   if (this->events_.empty())
@@ -2020,6 +2285,11 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
     return;
   }
 #endif
+
+  if (request->url() == "/components") {
+    this->handle_components_request(request);
+    return;
+  }
 
   UrlMatch match = match_url(request->url().c_str());  // NOLINT
 #ifdef USE_SENSOR
