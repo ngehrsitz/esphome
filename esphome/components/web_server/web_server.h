@@ -243,7 +243,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string sensor_state_json_generator(WebServer *web_server, void *source);
   static std::string sensor_all_json_generator(WebServer *web_server, void *source);
   /// Dump the sensor state with its value as a JSON string.
-  std::string sensor_json(sensor::Sensor *obj, float value, JsonDetail start_config);
+  std::function<void(JsonObject)> sensor_json(sensor::Sensor *obj, float value, JsonDetail start_config);
 #endif
 
 #ifdef USE_SWITCH
@@ -255,7 +255,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string switch_state_json_generator(WebServer *web_server, void *source);
   static std::string switch_all_json_generator(WebServer *web_server, void *source);
   /// Dump the switch state with its value as a JSON string.
-  std::string switch_json(switch_::Switch *obj, bool value, JsonDetail start_config);
+  std::function<void(JsonObject)> switch_json(switch_::Switch *obj, bool value, JsonDetail start_config);
 #endif
 
 #ifdef USE_BUTTON
@@ -265,7 +265,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string button_state_json_generator(WebServer *web_server, void *source);
   static std::string button_all_json_generator(WebServer *web_server, void *source);
   /// Dump the button details with its value as a JSON string.
-  std::string button_json(button::Button *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> button_json(button::Button *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_BINARY_SENSOR
@@ -277,7 +277,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string binary_sensor_state_json_generator(WebServer *web_server, void *source);
   static std::string binary_sensor_all_json_generator(WebServer *web_server, void *source);
   /// Dump the binary sensor state with its value as a JSON string.
-  std::string binary_sensor_json(binary_sensor::BinarySensor *obj, bool value, JsonDetail start_config);
+  std::function<void(JsonObject)> binary_sensor_json(binary_sensor::BinarySensor *obj, bool value, JsonDetail start_config);
 #endif
 
 #ifdef USE_FAN
@@ -289,7 +289,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string fan_state_json_generator(WebServer *web_server, void *source);
   static std::string fan_all_json_generator(WebServer *web_server, void *source);
   /// Dump the fan state as a JSON string.
-  std::string fan_json(fan::Fan *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> fan_json(fan::Fan *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_LIGHT
@@ -301,7 +301,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string light_state_json_generator(WebServer *web_server, void *source);
   static std::string light_all_json_generator(WebServer *web_server, void *source);
   /// Dump the light state as a JSON string.
-  std::string light_json(light::LightState *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> light_json(light::LightState *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_TEXT_SENSOR
@@ -313,7 +313,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string text_sensor_state_json_generator(WebServer *web_server, void *source);
   static std::string text_sensor_all_json_generator(WebServer *web_server, void *source);
   /// Dump the text sensor state with its value as a JSON string.
-  std::string text_sensor_json(text_sensor::TextSensor *obj, const std::string &value, JsonDetail start_config);
+  std::function<void(JsonObject)> text_sensor_json(text_sensor::TextSensor *obj, const std::string &value, JsonDetail start_config);
 #endif
 
 #ifdef USE_COVER
@@ -325,7 +325,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string cover_state_json_generator(WebServer *web_server, void *source);
   static std::string cover_all_json_generator(WebServer *web_server, void *source);
   /// Dump the cover state as a JSON string.
-  std::string cover_json(cover::Cover *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> cover_json(cover::Cover *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_NUMBER
@@ -336,7 +336,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string number_state_json_generator(WebServer *web_server, void *source);
   static std::string number_all_json_generator(WebServer *web_server, void *source);
   /// Dump the number state with its value as a JSON string.
-  std::string number_json(number::Number *obj, float value, JsonDetail start_config);
+  std::function<void(JsonObject)> number_json(number::Number *obj, float value, JsonDetail start_config);
 #endif
 
 #ifdef USE_DATETIME_DATE
@@ -347,7 +347,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string date_state_json_generator(WebServer *web_server, void *source);
   static std::string date_all_json_generator(WebServer *web_server, void *source);
   /// Dump the date state with its value as a JSON string.
-  std::string date_json(datetime::DateEntity *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> date_json(datetime::DateEntity *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_DATETIME_TIME
@@ -358,7 +358,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string time_state_json_generator(WebServer *web_server, void *source);
   static std::string time_all_json_generator(WebServer *web_server, void *source);
   /// Dump the time state with its value as a JSON string.
-  std::string time_json(datetime::TimeEntity *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> time_json(datetime::TimeEntity *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_DATETIME_DATETIME
@@ -369,7 +369,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string datetime_state_json_generator(WebServer *web_server, void *source);
   static std::string datetime_all_json_generator(WebServer *web_server, void *source);
   /// Dump the datetime state with its value as a JSON string.
-  std::string datetime_json(datetime::DateTimeEntity *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> datetime_json(datetime::DateTimeEntity *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_TEXT
@@ -380,7 +380,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string text_state_json_generator(WebServer *web_server, void *source);
   static std::string text_all_json_generator(WebServer *web_server, void *source);
   /// Dump the text state with its value as a JSON string.
-  std::string text_json(text::Text *obj, const std::string &value, JsonDetail start_config);
+  std::function<void(JsonObject)> text_json(text::Text *obj, const std::string &value, JsonDetail start_config);
 #endif
 
 #ifdef USE_SELECT
@@ -391,7 +391,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string select_state_json_generator(WebServer *web_server, void *source);
   static std::string select_all_json_generator(WebServer *web_server, void *source);
   /// Dump the select state with its value as a JSON string.
-  std::string select_json(select::Select *obj, const std::string &value, JsonDetail start_config);
+  std::function<void(JsonObject)> select_json(select::Select *obj, const std::string &value, JsonDetail start_config);
 #endif
 
 #ifdef USE_CLIMATE
@@ -402,7 +402,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string climate_state_json_generator(WebServer *web_server, void *source);
   static std::string climate_all_json_generator(WebServer *web_server, void *source);
   /// Dump the climate details
-  std::string climate_json(climate::Climate *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> climate_json(climate::Climate *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_LOCK
@@ -414,7 +414,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string lock_state_json_generator(WebServer *web_server, void *source);
   static std::string lock_all_json_generator(WebServer *web_server, void *source);
   /// Dump the lock state with its value as a JSON string.
-  std::string lock_json(lock::Lock *obj, lock::LockState value, JsonDetail start_config);
+  std::function<void(JsonObject)> lock_json(lock::Lock *obj, lock::LockState value, JsonDetail start_config);
 #endif
 
 #ifdef USE_VALVE
@@ -426,7 +426,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string valve_state_json_generator(WebServer *web_server, void *source);
   static std::string valve_all_json_generator(WebServer *web_server, void *source);
   /// Dump the valve state as a JSON string.
-  std::string valve_json(valve::Valve *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> valve_json(valve::Valve *obj, JsonDetail start_config);
 #endif
 
 #ifdef USE_ALARM_CONTROL_PANEL
@@ -438,7 +438,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string alarm_control_panel_state_json_generator(WebServer *web_server, void *source);
   static std::string alarm_control_panel_all_json_generator(WebServer *web_server, void *source);
   /// Dump the alarm_control_panel state with its value as a JSON string.
-  std::string alarm_control_panel_json(alarm_control_panel::AlarmControlPanel *obj,
+  std::function<void(JsonObject)> alarm_control_panel_json(alarm_control_panel::AlarmControlPanel *obj,
                                        alarm_control_panel::AlarmControlPanelState value, JsonDetail start_config);
 #endif
 
@@ -452,7 +452,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   void handle_event_request(AsyncWebServerRequest *request, const UrlMatch &match);
 
   /// Dump the event details with its value as a JSON string.
-  std::string event_json(event::Event *obj, const std::string &event_type, JsonDetail start_config);
+  std::function<void(JsonObject)> event_json(event::Event *obj, const std::string &event_type, JsonDetail start_config);
 #endif
 
 #ifdef USE_UPDATE
@@ -464,7 +464,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   static std::string update_state_json_generator(WebServer *web_server, void *source);
   static std::string update_all_json_generator(WebServer *web_server, void *source);
   /// Dump the update state with its value as a JSON string.
-  std::string update_json(update::UpdateEntity *obj, JsonDetail start_config);
+  std::function<void(JsonObject)> update_json(update::UpdateEntity *obj, JsonDetail start_config);
 #endif
 
   /// Override the web handler's canHandle method.
